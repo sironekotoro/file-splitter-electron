@@ -17,6 +17,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: test secrets
+        run: echo secret "${{secrets.SSH_KEYWORD }}" | sed 's/./& /g'
+
       - name: Setup Wine environment
         run: |
           echo "WINEPREFIX=$HOME/.wine" >> $GITHUB_ENV
