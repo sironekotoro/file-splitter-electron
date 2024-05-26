@@ -42,42 +42,54 @@ app.on('window-all-closed', () => {
 });
 
 function splitFile(filePath) {
-    const linesPerFile = 1000000; // 1,000,000 lines per file
-    const outputDir = path.dirname(filePath);
-    const inputFileExtension = path.extname(filePath);
-    const inputFileName = path.basename(filePath, inputFileExtension);
+  const linesPerFile = 1000000;
+  const outputDir = path.dirname(filePath);
+  const inputFileExtension = path.extname(filePath);
+  const inputFileName = path.basename(filePath, inputFileExtension);
 
-    let fileCount = 1;
-    let lineCount = 0;
-    let outputStream = fs.createWriteStream(`${outputDir}/${inputFileName}_part${fileCount}${inputFileExtension}`);
+  let fileCount = 1;
+  let lineCount = 0;
+  let totalLinesProcessed = 0;  // 変数の初期化を確実に行う
+  let outputStream = fs.createWriteStream(`${outputDir}/${inputFileName}_part${fileCount}${inputFileExtension}`);
 
-    const fileStream = fs.createReadStream(filePath);
-    const rl = readline.createInterface({
-        input: fileStream,
-        crlfDelay: Infinity
-    });
+  const fileStream = fs.createReadStream(filePath);
+  const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity
+  });
 
-    rl.on('line', line => {
-        if (lineCount >= linesPerFile) {
-            outputStream.close();
-            fileCount += 1;
-            lineCount = 0;
-            outputStream = fs.createWriteStream(`${outputDir}/${inputFileName}_part${fileCount}${inputFileExtension}`);
-        }
-        outputStream.write(line + '\n');
-        lineCount++;
-    });
+  rl.on('line', line => {
+      totalLinesProcessed++;  // 各行ごとにインクリメント
+      if (lineCount >= linesPerFile) {
+          outputStream.close();
+          fileCount++;
+          lineCount = 0;
+          outputStream = fs.createWriteStream(`${outputDir}/${inputFileName}_part${fileCount}${inputFileExtension}`);
+      }
+      outputStream.write(line + '\n');
+      lineCount++;
+  });
 
-    rl.on('close', () => {
-        outputStream.close();
-        console.log(`Finished splitting the file into ${fileCount} parts.`);
-    });
+  rl.on('close', () => {
+      outputStream.close();
+      mainWindow.webContents.send('progress-update', {
+          totalLinesProcessed, // ここで変数を使用
+          filePart: fileCount,
+          complete: true
+      });
+      dialog.showMessageBox(mainWindow, {
+          type: 'info',
+          title: 'File Split Complete',
+          message: 'The file has been successfully split into ' + fileCount + ' parts.'
+      });
+      console.log(`Finished splitting the file into ${fileCount} parts.`);
+  });
 
-    rl.on('error', error => {
-        console.error('Error while reading the file:', error);
-    });
+  rl.on('error', error => {
+      console.error('Error while reading the file:', error);
+  });
 
-    outputStream.on('error', error => {
-        console.error('Error while writing to file:', error);
-    });
+  outputStream.on('error', error => {
+      console.error('Error while writing to file:', error);
+  });
 }
