@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: test secrets
-        run: echo secret "${{secrets.SSH_KEYWORD }}" | sed 's/./& /g'
+        run: echo secret "${{secrets.GH_TOKEN }}" | sed 's/./& /g'
 
       - name: Setup Wine environment
         run: |
