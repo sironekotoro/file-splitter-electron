@@ -14,5 +14,17 @@
   "devDependencies": {
     "electron": "^30.0.8",
     "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.sironekotoro.file-splitter-electron",
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }
