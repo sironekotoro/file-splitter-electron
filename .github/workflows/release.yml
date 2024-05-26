@@ -17,9 +17,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: test secrets
-        run: echo secret "${{secrets.GH_TOKEN }}" | sed 's/./& /g'
-
       - name: Setup Wine environment
         run: |
           echo "WINEPREFIX=$HOME/.wine" >> $GITHUB_ENV
@@ -49,4 +46,4 @@ jobs:
         with:
           files: dist/*.exe
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
